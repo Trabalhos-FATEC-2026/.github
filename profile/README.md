@@ -111,5 +111,5 @@ O acesso é controlado por roles (ex: USER, ADMIN).
 
 Responsáveis pelo projeto
 
-Diogo Marques
+Diogo Marques e 
 Gabriel Messias
