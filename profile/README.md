@@ -1,63 +1,115 @@
-# 🌐 Arquitetura de Microserviços com API Gateway e Clean Architecture
+Arquitetura de Microserviços
 
-Bem-vindo à organização do projeto de Microserviços! Este ecossistema foi desenvolvido como parte de um projeto acadêmico focado em práticas avançadas do curso de Desenvolvimento de Sistemas, simulando cenários reais de produção com alta escalabilidade, segurança e baixo acoplamento.
+O sistema foi estruturado em uma arquitetura baseada em microserviços, com comunicação indireta centralizada por um API Gateway. Cada domínio da aplicação é isolado em um serviço independente, com banco de dados e responsabilidade próprios, evitando acoplamento entre módulos.
 
----
-
-## 🎯 Visão Geral
-
-Este projeto consiste na construção de um sistema distribuído baseado em microserviços. O objetivo principal é gerenciar Clientes e Produtos (com fluxo de compras), centralizando o acesso, o roteamento e a validação de segurança através de um **API Gateway**.
-
-A arquitetura foi rigorosamente desenhada seguindo os princípios de **Clean Architecture**, garantindo que as regras de negócio puras fiquem isoladas de frameworks e detalhes de infraestrutura.
 
 ---
 
-## 🏗️ Estrutura da Organização e Repositórios
+Estrutura dos serviços
 
-Cada microserviço é um projeto independente e possui seu próprio repositório dentro desta organização. 
+A arquitetura é composta pelos seguintes microserviços:
 
-Abaixo está o mapa de repositórios:
+API Gateway Responsável por ser o ponto único de entrada do sistema. Todas as requisições passam por ele antes de chegar aos serviços internos. Ele realiza o roteamento das rotas (/auth/**, /clientes/**, /produtos/**) e aplica validações globais, principalmente a verificação de token JWT.
 
-* **[`api-gateway`](#)**: Ponto de entrada único da aplicação. Responsável pelo roteamento de requisições (`/auth/**`, `/clientes/**`, `/produtos/**`), balanceamento de carga e aplicação de filtros globais (ex: validação de token JWT).
-* **[`auth-service`](#)**: Serviço responsável pela gestão de usuários e autenticação. Gera os tokens JWT para acesso seguro aos demais recursos.
-* **[`cliente-service`](#)**: Serviço de gerenciamento de clientes, incluindo dados pessoais e endereços.
-* **[`produto-service`](#)**: Serviço de catálogo de produtos e registro de compras associadas aos clientes.
+Auth Service Responsável pela autenticação de usuários. Realiza login, valida credenciais e gera tokens JWT utilizados para acesso aos demais serviços.
 
----
+Cliente Service Responsável pelo gerenciamento de clientes, incluindo cadastro e manutenção de dados pessoais.
 
-## 🧩 Clean Architecture (Arquitetura Limpa)
+Produto Service Responsável pelo catálogo de produtos e pelo processamento das operações de compra.
 
-Com exceção do API Gateway, todos os microserviços (`auth`, `cliente`, `produto`) são divididos internamente em dois módulos distintos para garantir o desacoplamento:
 
-1.  **Módulo `domain` (Núcleo):** Contém as regras de negócio puras, entidades e interfaces (portas). Zero dependência de frameworks externos.
-2.  **Módulo `spring` (Infraestrutura):** Contém os Controllers REST, DTOs, configurações de segurança, e a implementação dos repositórios utilizando Spring Data e MongoDB (adaptadores).
-
-**Fluxo de Requisição:**
-`Controller (Spring)` ➡️ `DTO -> Adapter` ➡️ `Service (Domain)` ➡️ `Repository Interface (Domain)` ➡️ `Repository Impl (Spring/MongoDB)`
 
 ---
 
-## 🚀 Tecnologias e Ferramentas
+Funcionamento da arquitetura
 
-O ecossistema foi construído utilizando as seguintes tecnologias:
+O fluxo básico do sistema ocorre da seguinte forma:
 
-* **Linguagem:** Java 17
-* **Framework Principal:** Spring Boot / Spring Web
-* **Gateway:** Spring Cloud Gateway
-* **Banco de Dados:** MongoDB (Spring Data MongoDB)
-* **Segurança:** Spring Security, JWT (JSON Web Tokens) e BCrypt
-* **Padrões:** REST, API Gateway, Clean Architecture, Microserviços
+1. O cliente realiza login no Auth Service.
+
+
+2. O serviço autentica as credenciais e retorna um JWT (Bearer Token).
+
+
+3. As requisições seguintes são feitas através do API Gateway, incluindo o token no header de autorização.
+
+
+4. O Gateway valida o token antes de encaminhar a requisição para o microserviço correspondente.
+
+
+5. Os microserviços (cliente e produto) processam a requisição de forma independente, cada um com sua própria lógica de negócio e persistência.
+
+
+
+Essa abordagem garante isolamento entre serviços, escalabilidade independente e menor acoplamento entre as partes do sistema.
+
 
 ---
 
-## 🔐 Segurança e Autenticação
+Organização interna dos microserviços
 
-A segurança é tratada de forma centralizada. 
-1.  O usuário se autentica no `auth-service`.
-2.  O serviço retorna um token **JWT** assinado (Bearer token).
-3.  Todas as requisições subsequentes passam pelo `api-gateway`, que intercepta e valida a assinatura do token antes de rotear para os serviços internos (`cliente` e `produto`).
-4.  Controle de acesso rigoroso baseado em Roles (`USER`, `ADMIN`).
+Com exceção do API Gateway, todos os microserviços seguem separação interna baseada em Clean Architecture:
+
+Domain Contém as regras de negócio, entidades e interfaces. Não possui dependência de frameworks.
+
+Spring (Infrastructure) Responsável pela camada de entrada e saída do sistema:
+
+Controllers REST
+
+DTOs
+
+Configurações de segurança
+
+Implementação de repositórios com Spring Data MongoDB
+
+
+
+Fluxo interno: Controller → DTO → Service (Domain) → Repository Interface → Implementação Spring/MongoDB
+
 
 ---
 
-> **Desenvolvido por:** Diogo Marques e Gabriel Messias
+Tecnologias utilizadas
+
+Java 17
+
+Spring Boot
+
+Spring Cloud Gateway
+
+Spring Security
+
+JWT (JSON Web Token)
+
+MongoDB
+
+Spring Data MongoDB
+
+Arquitetura REST
+
+Microserviços
+
+
+
+---
+
+Segurança
+
+A autenticação é centralizada no Auth Service. O controle de acesso funciona via JWT:
+
+O token é gerado no login.
+
+O API Gateway intercepta todas as requisições.
+
+O token é validado antes do redirecionamento para os serviços internos.
+
+O acesso é controlado por roles (ex: USER, ADMIN).
+
+
+
+---
+
+Responsáveis pelo projeto
+
+Diogo Marques
+Gabriel Messias
